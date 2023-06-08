@@ -53,6 +53,9 @@ import java.util.regex.Pattern;
  * @date :2020/12/18
  * @description:
  */
+// 添加引用   51行
+import com.github.catvod.crawler.SpiderNull;
+import com.undcover.freedom.pyramid.PythonLoader;
 public class ApiConfig {
     private static ApiConfig instance;
     private final LinkedHashMap<String, SourceBean> sourceBeanList;
@@ -303,7 +306,9 @@ public class ApiConfig {
     }
 
     private void parseJson(String apiUrl, String jsonStr) {
-
+    //pyramid-add-start  309行
+	PythonLoader.getInstance().setConfig(jsonStr);
+    //pyramid-add-end
         JsonObject infoJson = new Gson().fromJson(jsonStr, JsonObject.class);
         // spider
         spider = DefaultConfig.safeJsonString(infoJson, "spider", "");
@@ -658,7 +663,16 @@ public class ApiConfig {
     }
 
     public Spider getCSP(SourceBean sourceBean) {
-
+    //pyramid-add-start   俊版576行   TK657行
+    if (sourceBean.getApi().startsWith("py_")) {
+        try {
+            return PythonLoader.getInstance().getSpider(sourceBean.getKey(), sourceBean.getExt());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new SpiderNull();
+        }
+    }
+    //pyramid-add-end
         // Getting js api
         if (sourceBean.getApi().endsWith(".js") || sourceBean.getApi().contains(".js?")) {
             return jsLoader.getSpider(sourceBean.getKey(), sourceBean.getApi(), sourceBean.getExt(), sourceBean.getJar());
@@ -668,7 +682,19 @@ public class ApiConfig {
     }
 
     public Object[] proxyLocal(Map param) {
-
+    //pyramid-add-start  俊版592行  TK675行
+    try {
+        if(param.containsKey("api")){
+            String doStr = param.get("do").toString();
+            if(doStr.equals("ck"))
+                return PythonLoader.getInstance().proxyLocal("","",param);
+            SourceBean sourceBean = ApiConfig.get().getSource(doStr);
+            return PythonLoader.getInstance().proxyLocal(sourceBean.getKey(),sourceBean.getExt(),param);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    //pyramid-add-end
         return jarLoader.proxyInvoke(param);
     }
 
