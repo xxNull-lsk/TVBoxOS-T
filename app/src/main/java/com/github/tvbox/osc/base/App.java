@@ -26,6 +26,8 @@ import me.jessyan.autosize.unit.Subunits;
  * @date :2020/12/17
  * @description:
  */
+// 添加引用
+import com.undcover.freedom.pyramid.PythonLoader;
 public class App extends MultiDexApplication {
     private static App instance;
 
@@ -53,6 +55,9 @@ public class App extends MultiDexApplication {
                 .setSupportSP(false)
                 .setSupportSubunits(Subunits.MM);
         PlayerHelper.init();
+            //pyramid-add-start
+	PythonLoader.getInstance().setApplication(this);
+    //pyramid-add-end
 
         // Delete Cache
         File dir = getCacheDir();
